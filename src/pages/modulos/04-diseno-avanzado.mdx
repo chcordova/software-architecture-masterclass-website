@@ -1,0 +1,147 @@
+import Layout from "../../layouts/Layout.astro";
+import { Callout } from "../../components/Callout";
+import { CodeTabs } from "../../components/CodeTabs";
+import Pagination from "../../components/Pagination.astro";
+
+export const codeWebValidation = `package com.company.attendance.infrastructure.input.web.validation;
+
+import jakarta.validation.ConstraintValidator;
+// ... imports
+
+public class EmployeeIdValidator implements ConstraintValidator<ValidEmployeeId, Long> {
+@Override
+public boolean isValid(Long value, ConstraintValidatorContext context) {
+return value != null && value > 0;
+}
+}`;
+
+export const codeDomainValidation = `package com.company.attendance.domain.model;
+
+import com.company.attendance.domain.exception.InvalidAttendanceException;
+
+public class Attendance {
+private final Long employeeId;
+
+    // El Dominio desconfía del mundo exterior y valida sus propias invariantes
+    private void validate() {
+        if (employeeId == null || employeeId <= 0) {
+            throw new InvalidAttendanceException("El ID del empleado es inválido (Regla de Negocio)");
+        }
+    }
+
+}`;
+
+export const codeExceptionHandler = `package com.company.attendance.infrastructure.input.web;
+
+import com.company.attendance.domain.exception.InvalidAttendanceException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // TRADUCTOR: Captura la excepción pura del dominio y la convierte en un contrato HTTP 400
+    @ExceptionHandler(InvalidAttendanceException.class)
+    public ResponseEntity<ErrorResponseDto> handleDomainException(InvalidAttendanceException ex) {
+        ErrorResponseDto error = new ErrorResponseDto("BAD_REQUEST", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+}`;
+
+export const codePomCapas = `<!-- pom.xml (Arquitectura en Capas) -->
+<dependencies>
+    <!-- El framework ORM contamina todo el proyecto desde la raíz -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+</dependencies>`;
+
+<Layout title="Módulo 4: Diseño Avanzado | Software Architecture Masterclass">
+
+# Módulo 4: Diseño Avanzado (El Mundo Real)
+
+La teoría de los Puertos y Adaptadores es elegante en papel, pero su implementación real exige resolver problemas complejos de control de dependencias, validaciones e intercepción de errores.
+
+Veamos cómo el repositorio `attendance-service-hexagonal` resuelve los mayores dolores de cabeza de los Arquitectos de Software.
+
+## 4.1 Fronteras de Validación (Validation Boundaries)
+
+Un error común al implementar Hexagonal es acoplar el Dominio a las anotaciones de Jakarta Validation (`@NotNull`, `@Size`). Si hacemos esto, nuestro dominio pasa a depender de una especificación externa.
+
+**La Solución:** Dividir la validación en dos barreras defensivas.
+
+1. **Barrera de Transporte (Infraestructura):** Validamos el formato de los datos que entran por HTTP (ej. un JSON válido, tipos numéricos) usando anotaciones propias como `@ValidEmployeeId`.
+2. **Barrera de Dominio (Core):** El objeto de negocio asume que el mundo exterior es hostil e inválido, por lo que vuelve a evaluar las reglas, pero esta vez con enfoque de negocio.
+
+<CodeTabs
+  client:visible
+  tabs={[
+    {
+      label: "Infraestructura (@ValidEmployeeId)",
+      language: "java",
+      code: codeWebValidation,
+    },
+    {
+      label: "Dominio (Attendance.validate)",
+      language: "java",
+      code: codeDomainValidation,
+    },
+  ]}
+/>
+
+## 4.2 Traducción de Excepciones (Exception Translation)
+
+Si el Dominio detecta una regla rota (ej. "Fecha en el futuro"), lanzará una excepción nativa: `FutureDateException`.
+
+**El problema:** El Dominio no sabe qué es un "HTTP 400 Bad Request", ni le importa.
+**La solución:** El adaptador de infraestructura (`GlobalExceptionHandler` con `@RestControllerAdvice`) actúa como un "Traductor de Idiomas", capturando el error del dominio y transformándolo en un DTO estandarizado para el cliente REST.
+
+<CodeTabs
+  client:visible
+  tabs={[
+    {
+      label: "Traductor Infraestructura (GlobalExceptionHandler)",
+      language: "java",
+      code: codeExceptionHandler,
+    },
+  ]}
+/>
+
+## 4.3 La Prueba de Fuego: Control de Dependencias a Nivel Compilación
+
+La forma definitiva de auditar si tu Arquitectura Hexagonal es real o es un "fraude", es mirar los archivos de compilación (`pom.xml` o `build.gradle`).
+
+En una arquitectura verdaderamente desacoplada, si extrajeras la carpeta `domain/` a su propio módulo `.jar`, su archivo de dependencias debería estar casi vacío (o depender solo de librerías utilitarias como Lombok o Apache Commons). **Está estrictamente prohibido importar dependencias de Spring Boot, JPA o Web en el núcleo.**
+
+<CodeTabs
+  client:visible
+  tabs={[
+    {
+      label: "pom.xml (Acoplamiento de Capas)",
+      language: "xml",
+      code: codePomCapas,
+    },
+  ]}
+/>
+
+<Callout title="Conclusión del Arquitecto" type="tip">
+  Al mantener el `pom.xml` del dominio limpio, garantizas que ninguna librería
+  mágica de inyección de dependencias dictará las reglas de tu negocio. Eres
+  dueño absoluto del comportamiento de tu software.
+</Callout>
+
+<Pagination
+  nextTitle="Módulo 5: Sistemas Distribuidos"
+  nextUrl="/modulos/05-sistemas-distribuidos"
+  prevTitle="Módulo 3: Arquitectura Hexagonal"
+  prevUrl="/modulos/03-arquitectura-hexagonal"
+/>
+
+</Layout>

@@ -1,119 +1,128 @@
 import Layout from "../../layouts/Layout.astro";
 import { Callout } from "../../components/Callout";
 import { CodeTabs } from "../../components/CodeTabs";
+import { FileTree } from "../../components/FileTree";
+import { Mermaid } from "../../components/Mermaid";
 import Pagination from "../../components/Pagination.astro";
 
-export const codeHexPort = `
-package com.company.attendance.domain.ports.in;
+export const treeStructure = [
+  {
+    name: "src/main/java/com/company/attendance",
+    type: "folder",
+    children: [
+      {
+        name: "domain",
+        type: "folder",
+        children: [
+          {
+            name: "model",
+            type: "folder",
+            children: [{ name: "Attendance.java", type: "file" }],
+          },
+          {
+            name: "ports",
+            type: "folder",
+            children: [
+              {
+                name: "in",
+                type: "folder",
+                children: [
+                  { name: "RegisterAttendanceUseCase.java", type: "file" },
+                ],
+              },
+              {
+                name: "out",
+                type: "folder",
+                children: [
+                  { name: "AttendanceRepositoryPort.java", type: "file" },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "infrastructure",
+        type: "folder",
+        children: [
+          {
+            name: "input/web",
+            type: "folder",
+            children: [{ name: "AttendanceController.java", type: "file" }],
+          },
+          {
+            name: "output/persistence",
+            type: "folder",
+            children: [{ name: "AttendanceJpaAdapter.java", type: "file" }],
+          },
+        ],
+      },
+    ],
+  },
+];
 
-import com.company.attendance.domain.model.Attendance;
-
-// DRIVING PORT: Define qué puede hacer el mundo exterior
-public interface RegisterAttendanceUseCase {
-Attendance execute(Attendance attendance);
-}
-`;
-
-export const codeHexController = `
-package com.company.attendance.infrastructure.input.web;
-
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/api/v1/attendances")
-public class AttendanceController {
-
-    private final RegisterAttendanceUseCase registerAttendanceUseCase;
-
-    public AttendanceController(RegisterAttendanceUseCase registerAttendanceUseCase) {
-        this.registerAttendanceUseCase = registerAttendanceUseCase;
+export const codeHexDomain = `
+public class Attendance {
+    private final Long employeeId;
+    
+    public void validate() {
+        if (employeeId == null || employeeId <= 0) {
+            throw new InvalidAttendanceException("ID inválido");
+        }
     }
-
-    @PostMapping
-    public ResponseEntity<AttendanceResponseDto> register(@RequestBody @Valid AttendanceRequestDto dto) {
-        Attendance domainModel = dto.toDomain();
-        Attendance saved = registerAttendanceUseCase.execute(domainModel);
-        return ResponseEntity.created(...).body(AttendanceResponseDto.fromDomain(saved));
-    }
-
-}
-`;
-
-export const codeHexJpaAdapter = `
-package com.company.attendance.infrastructure.output.persistence;
-
-import com.company.attendance.domain.model.Attendance;
-import com.company.attendance.domain.ports.out.AttendanceRepositoryPort;
-import org.springframework.stereotype.Component;
-
-// DRIVEN ADAPTER: Traduce el Dominio a Infraestructura (Spring/JPA)
-@Component
-public class AttendanceJpaAdapter implements AttendanceRepositoryPort {
-
-    private final SpringDataAttendanceRepository repository;
-
-    @Override
-    public Attendance save(Attendance attendance) {
-        AttendanceEntity entity = AttendanceEntity.fromDomain(attendance);
-        AttendanceEntity savedEntity = repository.save(entity);
-        return savedEntity.toDomain();
-    }
-
 }
 `;
 
 <Layout title="Módulo 3: Arquitectura Hexagonal | Software Architecture Masterclass">
 
-# Módulo 3: Arquitectura Hexagonal y Diseño Guiado por el Dominio (DDD)
+# Módulo 3: Arquitectura Hexagonal y Data Fidelity
 
-En este módulo exploraremos cómo la **Arquitectura Hexagonal** (_Ports and Adapters_) aísla las reglas de negocio del software frente a marcos de trabajo externos y tecnologías de infraestructura, utilizando el repositorio `attendance-service-hexagonal`.
+La Arquitectura Hexagonal (_Ports and Adapters_), propuesta por Alistair Cockburn, invierte las dependencias: la UI y la Base de Datos son "plugins" que dependen del Dominio, nunca al revés.
 
-## 3.1 Teoría: Puertos, Adaptadores y Fidelidad de Datos
+<div className="my-8">
+  <Mermaid
+    client:visible
+    chart={`
+    graph LR;
+      A((Actor REST)) -.->|Driving Adapter| B[In Port];
+      B --> C{Dominio Puro};
+      C --> D[Out Port];
+      D -.->|Driven Adapter| E[(Base de Datos)];
+      
+      style C fill:#4f46e5,stroke:#312e81,stroke-width:3px,color:#fff
+  `}
+  />
+</div>
 
-Concebida por **Alistair Cockburn**, la **Arquitectura Hexagonal** establece que el núcleo de la aplicación (_Domain Core_) no debe conocer los detalles de cómo se entregan los datos (REST, GraphQL, CLI) ni cómo se persisten (JPA, MongoDB, Archivos).
+## Explorando \`attendance-service-hexagonal\`
 
-### Puertos y Adaptadores
+En lugar de aislar por tecnología (Capas), aislamos el **Dominio** de la **Infraestructura**. Observa el árbol de directorios de nuestro repositorio:
 
-- **Puertos (Ports):** Interfaces que definen los contratos de entrada (_Driving Ports_) y salida (_Driven Ports_) del dominio.
-- **Adaptadores (Adapters):** Componentes externos que traducen protocolos del mundo exterior hacia o desde los puertos abstractos del dominio.
+<div className="my-6">
+  <FileTree client:visible structure={treeStructure} />
+</div>
 
-### La Observación de Eric Evans sobre la Fidelidad de Datos
-
-En la visión inicial de Cockburn, la base de datos era vista como un adaptador intercambiable más. **Eric Evans (creador de DDD)** enriqueció esta postura señalando la **Fidelidad de los Datos** (_Data Fidelity_): en microservicios reales, el modelo de datos relacional y sus transacciones están íntimamente ligados a las reglas del contexto delimitado (_Bounded Context_), por lo que el dominio debe poseer su propio modelo libre de anotaciones de frameworks.
-
-## 3.2 Práctica: Análisis del Repositorio `attendance-service-hexagonal`
-
-El repositorio `attendance-service-hexagonal` desacopla completamente el núcleo de negocio dentro del paquete `domain/`.
-
-<Callout title="Estructura del Dominio Aislado" type="info">
-  El paquete `domain/` contiene excepciones, entidades puras y puertos. No hay
-  rastro de anotaciones de Spring Boot, Hibernate o Jakarta Validation.
+<Callout title="La Regla de Oro" type="tip">
+  El directorio \`domain/\` no tiene dependencias de Spring Boot, Hibernate ni
+  de Jakarta. Si el framework web muere mañana, el negocio sigue intacto.
 </Callout>
 
-### Desacoplamiento en Código: Puertos y Adaptadores
+## Eric Evans y la Fidelidad de Datos (Data Fidelity)
 
-El flujo de control se invierte utilizando interfaces. Observa cómo el Controlador (Adaptador) invoca al Caso de Uso (Puerto), y cómo el Adaptador JPA implementa el contrato de salida:
+En el diseño original de Hexagonal, Cockburn veía a la base de datos como "solo un adaptador más". Sin embargo, **Eric Evans (creador de DDD)** corrigió esto en sistemas distribuidos.
+
+La **Data Fidelity** dicta que la base de datos no es una maquinaria separada; sus esquemas relacionales deben mutar y reflejar estrictamente las reglas del dominio (_Bounded Context_). Es por eso que, aunque separemos el adaptador JPA en \`infrastructure/\`, las validaciones e invariantes de datos viven y se evalúan obligatoriamente en la entidad pura de Java dentro de \`domain/\`.
 
 <CodeTabs
   client:visible
   tabs={[
-    { label: "Driving Port (Interface)", language: "java", code: codeHexPort },
     {
-      label: "REST Adapter Controller",
+      label: "Domain Entity (Fidelidad de Datos)",
       language: "java",
-      code: codeHexController,
-    },
-    {
-      label: "Driven Adapter (JPA)",
-      language: "java",
-      code: codeHexJpaAdapter,
+      code: codeHexDomain,
     },
   ]}
 />
-
-### El Costo del Desacoplamiento (Data Mapping)
-
-Lograr esta pureza tiene un costo (_Trade-off_): requerimos mapear objetos constantemente (`DTO` $\leftrightarrow$ `Domain Model` $\leftrightarrow$ `JPA Entity`). Sin embargo, este precio se paga gustosamente para blindar la aplicación frente a cambios tecnológicos futuros.
 
 <Pagination
   nextTitle="Módulo 4: Sistemas Distribuidos"

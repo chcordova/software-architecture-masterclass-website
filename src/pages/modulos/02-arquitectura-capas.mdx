@@ -1,139 +1,91 @@
 import Layout from "../../layouts/Layout.astro";
 import { Callout } from "../../components/Callout";
 import { CodeTabs } from "../../components/CodeTabs";
+import { Mermaid } from "../../components/Mermaid";
 import Pagination from "../../components/Pagination.astro";
 
 export const codeLayeredEntity = `
-package com.company.attendance.model;
-
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "attendances")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Attendance {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "employee_id", nullable = false)
+    
+    @Column(nullable = false)
     private Long employeeId;
-
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private AttendanceType type;
-
 }
 `;
 
-export const codeHexagonalDomain = `
-package com.company.attendance.domain.model;
+export const codeArchUnit = `
+// Fitness Function para gobernar las capas
+layeredArchitecture()
+    .layer("Controller").definedBy("..controller..")
+    .layer("Service").definedBy("..service..")
+    .layer("Persistence").definedBy("..persistence..")
 
-import com.company.attendance.domain.exception.FutureDateException;
-import com.company.attendance.domain.exception.InvalidAttendanceException;
-import java.time.LocalDateTime;
+    .whereLayer("Controller").mayNotBeAccessedByAnyLayer()
+    .whereLayer("Service").mayOnlyBeAccessedByLayers("Controller")
+    .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service");
 
-public class Attendance {
-
-    private final Long id;
-    private final Long employeeId;
-    private final LocalDateTime timestamp;
-    private final AttendanceType type;
-
-    public Attendance(Long id, Long employeeId, LocalDateTime timestamp, AttendanceType type) {
-        this.id = id;
-        this.employeeId = employeeId;
-        this.timestamp = timestamp;
-        this.type = type;
-        validate();
-    }
-
-    public void validate() {
-        if (employeeId == null || employeeId <= 0) {
-            throw new InvalidAttendanceException("Employee ID must be positive.");
-        }
-        if (timestamp == null) {
-            throw new InvalidAttendanceException("Timestamp is mandatory.");
-        }
-        if (timestamp.isAfter(LocalDateTime.now())) {
-            throw new FutureDateException(timestamp);
-        }
-        if (type == null) {
-            throw new InvalidAttendanceException("Attendance type is mandatory.");
-        }
-    }
-
-}
 `;
 
 <Layout title="Módulo 2: Arquitectura en Capas | Software Architecture Masterclass">
 
-# Módulo 2: Arquitectura en Capas (Teoría vs. Código)
+# Módulo 2: Arquitectura en Capas (Deep Dive)
 
-En este módulo contrastaremos la teoría clásica del patrón de **Arquitectura en Capas (Layered / 3-Tier Architecture)** con la implementación real del repositorio `attendance-service-layered`.
+La Arquitectura en Capas es el estándar de la industria por su simplicidad. Alinea la estructura del código con las capacidades técnicas (Presentación, Negocio, Datos).
 
-## 2.1 Teoría: Particionamiento Técnico y Aislamiento
+<div className="my-8">
+  <Mermaid
+    client:visible
+    chart={`
+    graph TD;
+      A[Cliente / UI] -->|HTTP Request| B[Controller Layer];
+      B -->|DTO| C[Service Layer];
+      C -->|Entity| D[Persistence Layer];
+      D -->|SQL| E[(Base de Datos)];
+      
+      style B fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff
+      style C fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff
+      style D fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff
+  `}
+  />
+</div>
 
-La **Arquitectura en Capas** organiza el código fuente aplicando un **particionamiento técnico** (_Technical partitioning_). Los componentes se agrupan horizontalmente según su rol tecnológico: Presentación, Lógica de Negocio (Servicio), Persistencia y Base de Datos.
+## El Antipatrón "Architecture Sinkhole"
 
-### Separación de Responsabilidades y MVC
+En _Fundamentals of Software Architecture_, Neal Ford advierte sobre la kryptonita de este modelo: **El Sumidero (Sinkhole)**.
 
-Este modelo sigue el principio de **Separation of Concerns (SoC)** y guarda una fuerte relación con el patrón **MVC (Model-View-Controller)**:
+Este antipatrón ocurre cuando las peticiones atraviesan las capas actuando únicamente como un "pasamanos". Si el `Controller` llama al `Service`, y este solo llama al `Repository.findAll()` sin aplicar ninguna regla de negocio, estás pagando un impuesto de procesamiento, memoria y latencia sin obtener valor.
 
-- **Capas de Aislamiento (Layers of Isolation):** En un modelo cerrado, una capa solo se comunica de forma descendente con la capa inmediatamente inferior. Esto permite sustituir la persistencia sin alterar la presentación.
-
-<Callout title="Ventajas Clave" type="tip">
-  * **Estructura intuitiva:** Alta familiaridad para equipos organizados por
-  especialidad técnica (Frontend, Backend, DBAs). * **Baja complejidad
-  inicial:** Ideal para aplicaciones sencillas, prototipos y CRUDs básicos.
+<Callout title="La Regla del 80/20" type="warning">
+  Si más del 20% de tus peticiones caen en este antipatrón, la arquitectura en
+  capas no es la adecuada para tu dominio. Estás frente a un sistema fuertemente
+  acoplado que degrada el rendimiento al obligar a todas las peticiones a cruzar
+  fronteras innecesarias.
 </Callout>
 
-### Desventajas y Antipatrones
+## Gobernanza Automática (Fitness Functions)
 
-1. **Architecture Sinkhole Antipattern:** Ocurre cuando las peticiones atraviesan todas las capas como un "sumidero" sin ejecutar lógica de negocio real (ej. `Controller -> Service -> Repository -> DB` simplemente para retornar un registro). Si más del 20% de las peticiones caen en este flujo, la arquitectura genera un _overhead_ innecesario de memoria y CPU.
-2. **Domain Smearing (Dispersión del Dominio):** Al no existir un núcleo de dominio aislado, la lógica de negocio se dispersa entre los controladores, servicios y las propias entidades del ORM.
-
-## 2.2 Práctica: Análisis del Repositorio `attendance-service-layered`
-
-El microservicio `attendance-service-layered` gestiona marcajes de asistencia (`CHECK_IN` / `CHECK_OUT`). El flujo de peticiones es estrictamente sincrónico y descendente: `Controller` $\rightarrow$ `Service` $\rightarrow$ `Repository` $\rightarrow$ `Base de Datos`.
-
-### Acoplamiento entre la Base de Datos y el Dominio
-
-Analicemos la clase `Attendance`. En la arquitectura en capas tradicional, la misma entidad que define el modelo de datos relacional es la que se utiliza para transportar la lógica en la aplicación.
-
-Observa la diferencia entre el modelo acoplado y el modelo puro:
+Para evitar que los desarrolladores rompan la jerarquía de capas (ej. un Controlador llamando directamente a la Base de Datos), los arquitectos modernos utilizan **Fitness Functions** con herramientas como `ArchUnit`.
 
 <CodeTabs
   client:visible
   tabs={[
     {
-      label: "Capas (model/Attendance.java)",
+      label: "Attendance (Entidad Acoplada)",
       language: "java",
       code: codeLayeredEntity,
     },
     {
-      label: "Hexagonal (domain/model/Attendance.java)",
+      label: "ArchUnit (Test de Arquitectura)",
       language: "java",
-      code: codeHexagonalDomain,
+      code: codeArchUnit,
     },
   ]}
 />
 
-<Callout title="Diagnóstico de Acoplamiento" type="warning">
-  En la versión **Capas**, la anotación `@Entity` vincula directamente la lógica
-  del negocio con el ORM Hibernate/JPA. Si el esquema de la base de datos cambia
-  o se migra a NoSQL, las clases del modelo deben modificarse por completo.
-</Callout>
+Como observamos, el modelo de datos dicta las reglas del negocio (`@Entity`), atando el destino de nuestro servicio a la tecnología del ORM.
 
 <Pagination
   nextTitle="Módulo 3: Arquitectura Hexagonal"
