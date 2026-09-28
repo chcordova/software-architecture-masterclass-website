@@ -1,0 +1,97 @@
+import Layout from "../../layouts/Layout.astro";
+import { Quiz } from "../../components/Quiz";
+import Pagination from "../../components/Pagination.astro";
+
+export const masterclassQuiz = [
+  {
+    id: 1,
+    question:
+      "Según Neal Ford y Mark Richards, ¿cuál es la razón fundamental por la cual la Primera Ley de la Arquitectura de Software afirma que 'Todo en la arquitectura de software es un trade-off'?",
+    options: [
+      "Porque los frameworks de desarrollo cambian tan rápido que las mejores prácticas caducan en menos de un año.",
+      "Porque no existen las decisiones binarias ni las 'mejores prácticas' universales; cada elección estructural requiere sopesar ventajas y desventajas en un contexto específico.",
+      "Porque la arquitectura en capas siempre degrada el rendimiento de los sistemas distribuidos.",
+      "Porque el costo de la infraestructura en la nube obliga a reducir la cantidad de microservicios.",
+    ],
+    correctIndex: 1,
+    explanation:
+      "La Primera Ley sostiene que no existen 'mejores prácticas' libres de riesgo; toda decisión arquitectónica involucra variables contrapuestas y el rol del arquitecto es encontrar la solución con el menor número de desventajas (least worst combination).",
+  },
+  {
+    id: 2,
+    question:
+      "En el repositorio attendance-service-layered, ¿qué característica refleja el concepto de 'Domain Smearing' o dispersión del dominio dentro de la arquitectura en capas?",
+    options: [
+      "El uso de anotaciones @RestControllerAdvice para capturar excepciones globales.",
+      "La falta de un archivo openapi.yaml para especificar los contratos del API.",
+      "La presencia de reglas de validación y modelos de datos repartidos entre la capa de controlador, la capa de servicio y la entidad JPA @Entity.",
+      "La imposibilidad de ejecutar pruebas de integración con Maven.",
+    ],
+    correctIndex: 2,
+    explanation:
+      "En las arquitecturas con particionamiento técnico, los flujos de negocio terminan repartidos a través de todas las capas horizontales, en lugar de estar encapsulados en un único modelo de dominio aislado.",
+  },
+  {
+    id: 3,
+    question:
+      "¿Qué distinción clave introdujo Eric Evans (DDD) respecto a la propuesta original de Arquitectura Hexagonal de Alistair Cockburn?",
+    options: [
+      "Propuso que los controladores REST deberían eliminarse y sustituirse por GraphQL.",
+      "Demostró que la base de datos no es un simple adaptador externo desechable, sino que la fidelidad de los datos (data fidelity) y sus esquemas forman parte integral del contexto delimitado del negocio.",
+      "Afirmó que la arquitectura en capas es superior a la arquitectura hexagonal para sistemas monolíticos.",
+      "Prohibió el uso de interfaces como puertos de entrada.",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Evans observó que tratar a la base de datos como un adaptador completamente ajeno al negocio ignoraba que los esquemas de datos deben evolucionar conjuntamente con las reglas del dominio (Data Fidelity).",
+  },
+  {
+    id: 4,
+    question:
+      "En el repositorio attendance-service-hexagonal, ¿cuál de las siguientes opciones describe correctamente el rol de la interfaz RegisterAttendanceUseCase y la clase AttendanceJpaAdapter?",
+    options: [
+      "RegisterAttendanceUseCase es un Driven Adapter y AttendanceJpaAdapter es un Driving Port.",
+      "RegisterAttendanceUseCase es un Driving / Input Port en el dominio, mientras que AttendanceJpaAdapter es un Driven / Output Adapter en la infraestructura.",
+      "Ambas clases pertenecen al paquete domain/model/ y están acopladas a Spring Data JPA.",
+      "RegisterAttendanceUseCase maneja peticiones HTTP y AttendanceJpaAdapter valida tokens JWT.",
+    ],
+    correctIndex: 1,
+    explanation:
+      "RegisterAttendanceUseCase es la interfaz del puerto de entrada (Driving Port) llamada por los controladores, mientras que AttendanceJpaAdapter es el adaptador de salida (Driven Adapter) que implementa la persistencia JPA.",
+  },
+  {
+    id: 5,
+    question:
+      "En el libro Software Architecture: The Hard Parts, ¿cómo se diferencian el Acoplamiento Estático y el Acoplamiento Dinámico en el diseño de microservicios?",
+    options: [
+      "El acoplamiento estático mide el tiempo de respuesta HTTP; el dinámico mide el tamaño del archivo .jar.",
+      "El acoplamiento estático se refiere a cómo están 'cableadas' las dependencias e infraestructuras al arrancar; el dinámico analiza cómo se comunican las unidades en tiempo de ejecución.",
+      "El acoplamiento estático solo ocurre en bases de datos relacionales; el dinámico solo ocurre en bases NoSQL.",
+      "No existe diferencia; ambos términos son sinónimos según la Primera Ley de la Arquitectura.",
+    ],
+    correctIndex: 1,
+    explanation:
+      "El acoplamiento estático evalúa las dependencias de código e infraestructura necesarias para inicializar un servicio (bootstrapping), mientras que el dinámico mide las llamadas sincrónicas/asincrónicas en tiempo de ejecución entre servicios.",
+  },
+];
+
+<Layout title="Módulo 6: Arquitectura en la Práctica (Quiz) | Software Architecture Masterclass">
+
+# Módulo 6: Arquitectura en la Práctica (Quiz)
+
+Pon a prueba tus conocimientos sobre la teoría de Neal Ford y Mark Richards, así como sobre la implementación práctica de las arquitecturas en capas y hexagonal vistas en los repositorios de código.
+
+<div className="mt-8">
+  <Quiz client:visible questions={masterclassQuiz} />
+</div>
+
+## ¡Felicitaciones!
+
+Has completado la **Ruta de Aprendizaje de Arquitectura de Software**. Ahora posees los fundamentos teóricos y prácticos para tomar decisiones arquitectónicas fundamentadas en proyectos reales.
+
+<Pagination
+  prevTitle="Módulo 5: Tabla Comparativa"
+  prevUrl="/modulos/05-comparativa"
+/>
+
+</Layout>

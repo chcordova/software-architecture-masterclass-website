@@ -1,0 +1,41 @@
+
+import Layout from '../../layouts/Layout.astro';
+import { Callout } from '../../components/Callout';
+import Pagination from '../../components/Pagination.astro';
+
+
+<Layout title="Módulo 5: Matriz Comparativa | Software Architecture Masterclass">
+
+# Módulo 5: Tabla Comparativa "Trade-off Analysis"
+
+Aplicando la **Primera Ley de la Arquitectura de Software**, evaluamos de manera rigurosa los _trade-offs_ entre las dos implementaciones reales analizadas en este Learning Path.
+
+## Tabla Comparativa de Trade-offs
+
+| Criterio / Métrica                        | `attendance-service-layered` (Arquitectura en Capas)                                                                                                                                        | `attendance-service-hexagonal` (Arquitectura Hexagonal)                                                                                                                                    |
+| :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Facilidad de Testeo (Testability)**     | **Media / Baja.** Las pruebas unitarias de servicios frecuentemente requieren inicializar Spring Boot o configurar _mocks_ complejos de JPA debido al acoplamiento con entidades `@Entity`. | **Muy Alta.** El dominio (`domain/`) se prueba mediante tests unitarios Java puros instantáneos, sin necesidad de cargar marcos de trabajo ni bases de datos.                              |
+| **Simplicidad (Simplicity)**              | **Alta.** Menor número de archivos, menor abstracción y flujo lineal directo (`Controller -> Service -> Repository`) fácil de seguir para desarrolladores júniors.                          | **Menor (Mayor Complejidad Inicial).** Requiere mapeadores explícitos (DTO $\leftrightarrow$ Domain $\leftrightarrow$ JPA Entity), interfaces de puertos y adaptadores de infraestructura. |
+| **Tolerancia a Cambios de Framework**     | **Baja.** El modelo está acoplado a `@Entity` de JPA/Hibernate. Cambiar la base de datos o el framework web impacta las clases centrales del sistema.                                       | **Excelente.** El núcleo `domain/` no posee dependencias de Spring Boot ni JPA. Reemplazar la persistencia solo afecta a la capa de `infrastructure/`.                                     |
+| **Acoplamiento Global (Global Coupling)** | **Alto.** Acoplamiento descendente en cascada. Los cambios en la base de datos o tablas se propagan hacia arriba a los servicios y controladores.                                           | **Bajo.** Inversión de dependencias mediante puertos. Las dependencias apuntan internamente hacia el dominio, protegiendo al negocio.                                                      |
+
+## Análisis y Conclusión del Arquitecto
+
+<Callout title="¿Cuándo seleccionar cada arquitectura?" type="info">
+  * **Selecciona Arquitectura en Capas si:** El proyecto es un CRUD simple, con
+  reglas de negocio reducidas, restricciones ajustadas de presupuesto/tiempo y
+  un equipo pequeño familiarizado con Spring Boot tradicional. * **Selecciona
+  Arquitectura Hexagonal si:** El sistema posee un dominio de negocio complejo y
+  cambiante (DDD), requiere alta cobertura de pruebas automáticas rápidas, se
+  prevé una larga vida útil con cambios tecnológicos o evolucionará hacia
+  microservicios distribuidos.
+</Callout>
+
+<Pagination
+  nextTitle="Módulo 6: Quiz Evaluativo"
+  nextUrl="/modulos/06-quiz"
+  prevTitle="Módulo 4: Sistemas Distribuidos"
+  prevUrl="/modulos/04-sistemas-distribuidos"
+/>
+
+</Layout>

@@ -1,0 +1,125 @@
+import Layout from "../../layouts/Layout.astro";
+import { Callout } from "../../components/Callout";
+import { CodeTabs } from "../../components/CodeTabs";
+import Pagination from "../../components/Pagination.astro";
+
+export const codeHexPort = `
+package com.company.attendance.domain.ports.in;
+
+import com.company.attendance.domain.model.Attendance;
+
+// DRIVING PORT: Define qué puede hacer el mundo exterior
+public interface RegisterAttendanceUseCase {
+Attendance execute(Attendance attendance);
+}
+`;
+
+export const codeHexController = `
+package com.company.attendance.infrastructure.input.web;
+
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/attendances")
+public class AttendanceController {
+
+    private final RegisterAttendanceUseCase registerAttendanceUseCase;
+
+    public AttendanceController(RegisterAttendanceUseCase registerAttendanceUseCase) {
+        this.registerAttendanceUseCase = registerAttendanceUseCase;
+    }
+
+    @PostMapping
+    public ResponseEntity<AttendanceResponseDto> register(@RequestBody @Valid AttendanceRequestDto dto) {
+        Attendance domainModel = dto.toDomain();
+        Attendance saved = registerAttendanceUseCase.execute(domainModel);
+        return ResponseEntity.created(...).body(AttendanceResponseDto.fromDomain(saved));
+    }
+
+}
+`;
+
+export const codeHexJpaAdapter = `
+package com.company.attendance.infrastructure.output.persistence;
+
+import com.company.attendance.domain.model.Attendance;
+import com.company.attendance.domain.ports.out.AttendanceRepositoryPort;
+import org.springframework.stereotype.Component;
+
+// DRIVEN ADAPTER: Traduce el Dominio a Infraestructura (Spring/JPA)
+@Component
+public class AttendanceJpaAdapter implements AttendanceRepositoryPort {
+
+    private final SpringDataAttendanceRepository repository;
+
+    @Override
+    public Attendance save(Attendance attendance) {
+        AttendanceEntity entity = AttendanceEntity.fromDomain(attendance);
+        AttendanceEntity savedEntity = repository.save(entity);
+        return savedEntity.toDomain();
+    }
+
+}
+`;
+
+<Layout title="Módulo 3: Arquitectura Hexagonal | Software Architecture Masterclass">
+
+# Módulo 3: Arquitectura Hexagonal y Diseño Guiado por el Dominio (DDD)
+
+En este módulo exploraremos cómo la **Arquitectura Hexagonal** (_Ports and Adapters_) aísla las reglas de negocio del software frente a marcos de trabajo externos y tecnologías de infraestructura, utilizando el repositorio `attendance-service-hexagonal`.
+
+## 3.1 Teoría: Puertos, Adaptadores y Fidelidad de Datos
+
+Concebida por **Alistair Cockburn**, la **Arquitectura Hexagonal** establece que el núcleo de la aplicación (_Domain Core_) no debe conocer los detalles de cómo se entregan los datos (REST, GraphQL, CLI) ni cómo se persisten (JPA, MongoDB, Archivos).
+
+### Puertos y Adaptadores
+
+- **Puertos (Ports):** Interfaces que definen los contratos de entrada (_Driving Ports_) y salida (_Driven Ports_) del dominio.
+- **Adaptadores (Adapters):** Componentes externos que traducen protocolos del mundo exterior hacia o desde los puertos abstractos del dominio.
+
+### La Observación de Eric Evans sobre la Fidelidad de Datos
+
+En la visión inicial de Cockburn, la base de datos era vista como un adaptador intercambiable más. **Eric Evans (creador de DDD)** enriqueció esta postura señalando la **Fidelidad de los Datos** (_Data Fidelity_): en microservicios reales, el modelo de datos relacional y sus transacciones están íntimamente ligados a las reglas del contexto delimitado (_Bounded Context_), por lo que el dominio debe poseer su propio modelo libre de anotaciones de frameworks.
+
+## 3.2 Práctica: Análisis del Repositorio `attendance-service-hexagonal`
+
+El repositorio `attendance-service-hexagonal` desacopla completamente el núcleo de negocio dentro del paquete `domain/`.
+
+<Callout title="Estructura del Dominio Aislado" type="info">
+  El paquete `domain/` contiene excepciones, entidades puras y puertos. No hay
+  rastro de anotaciones de Spring Boot, Hibernate o Jakarta Validation.
+</Callout>
+
+### Desacoplamiento en Código: Puertos y Adaptadores
+
+El flujo de control se invierte utilizando interfaces. Observa cómo el Controlador (Adaptador) invoca al Caso de Uso (Puerto), y cómo el Adaptador JPA implementa el contrato de salida:
+
+<CodeTabs
+  client:visible
+  tabs={[
+    { label: "Driving Port (Interface)", language: "java", code: codeHexPort },
+    {
+      label: "REST Adapter Controller",
+      language: "java",
+      code: codeHexController,
+    },
+    {
+      label: "Driven Adapter (JPA)",
+      language: "java",
+      code: codeHexJpaAdapter,
+    },
+  ]}
+/>
+
+### El Costo del Desacoplamiento (Data Mapping)
+
+Lograr esta pureza tiene un costo (_Trade-off_): requerimos mapear objetos constantemente (`DTO` $\leftrightarrow$ `Domain Model` $\leftrightarrow$ `JPA Entity`). Sin embargo, este precio se paga gustosamente para blindar la aplicación frente a cambios tecnológicos futuros.
+
+<Pagination
+  nextTitle="Módulo 4: Sistemas Distribuidos"
+  nextUrl="/modulos/04-sistemas-distribuidos"
+  prevTitle="Módulo 2: Arquitectura en Capas"
+  prevUrl="/modulos/02-arquitectura-capas"
+/>
+
+</Layout>

@@ -1,0 +1,57 @@
+
+import Layout from '../../layouts/Layout.astro';
+import { Callout } from '../../components/Callout';
+import Pagination from '../../components/Pagination.astro';
+
+
+<Layout title="Módulo 1: Fundamentos y Leyes | Software Architecture Masterclass">
+
+# Módulo 1: Fundamentos y Las Leyes de la Arquitectura
+
+Bienvenido al primer módulo del **Learning Path de Arquitectura de Software**. En esta sección sentaremos las bases conceptuales indispensables basadas en la literatura fundamental de **Neal Ford** y **Mark Richards**, analizando cómo se toman decisiones estructurales en sistemas modernos.
+
+## 1.1 La Primera Ley de la Arquitectura de Software
+
+En el análisis de sistemas complejos, Neal Ford y Mark Richards formulan la **Primera Ley de la Arquitectura de Software**:
+
+> _"Todo en la arquitectura de software es un trade-off."_
+
+Esta ley dictamina que en el diseño de arquitectura **no existen las soluciones "bala de plata" (silver bullets) ni las "mejores prácticas" absolutas**. Cualquier decisión de diseño beneficia ciertas características arquitectónicas (como rendimiento, escalabilidad o mantenibilidad) a expensas de otras (como simplicidad, costo o tiempo de desarrollo).
+
+<Callout title="Corolarios Esenciales de la Primera Ley" type="warning">
+  1. **Primer Corolario:** Si crees que has encontrado una solución que no
+  representa un *trade-off*, lo más probable es que simplemente aún no has
+  identificado cuál es la desventaja oculta. 2. **Segundo Corolario:** El
+  trabajo fundamental de un Arquitecto de Software no es encontrar soluciones
+  perfectas, sino identificar, evaluar y balancear los *trade-offs* para
+  seleccionar la combinación "menos mala" (*least worst combination*) acorde a
+  las necesidades del negocio.
+</Callout>
+
+## 1.2 Las Falacias de la Computación Distribuida
+
+Al evolucionar desde arquitecturas monolíticas hacia microservicios distribuidos, los desarrolladores con frecuencia incurren en errores provocados por las **8 Falacias de la Computación Distribuida**, formuladas por **L. Peter Deutsch** y sus colegas en Sun Microsystems:
+
+1. **La red es confiable:** Asumir que la conectividad HTTP/gRPC jamás fallará.
+2. **La latencia es cero:** Ignorar el impacto acumulativo de las llamadas remotas por red en comparación con las llamadas en memoria.
+3. **El ancho de banda es infinito:** Sobrecargar los mensajes con payloads excesivos y pesados.
+4. **La red es segura:** No proteger adecuadamente cada comunicación entre nodos o servicios.
+5. **La topología de la red no cambia:** Confiar en direcciones IP estáticas en entornos elásticos de nube.
+6. **Hay un solo administrador:** Ignorar que diferentes equipos controlan distintos segmentos de red y servicios.
+7. **El costo de transporte es cero:** Olvidar el sobrecosto de serialización, deserialización y marshaling de datos.
+8. **La red es homogénea:** Asumir que todos los componentes comparten el mismo protocolo, sistema operativo y stack.
+
+<Callout title="Impacto en el Diseño de Microservicios" type="danger">
+  Ignorar estas falacias conduce directamente al antipatrón **"Big Ball of
+  Distributed Mud"** (Gran Bola de Barro Distribuida). Cuando descomponemos un
+  sistema en microservicios, el acoplamiento dinámico a través de la red
+  multiplica la complejidad de fallos, introduce latencias no deterministas y
+  degrada la capacidad de diagnosticar errores sin observabilidad avanzada.
+</Callout>
+
+<Pagination
+  nextTitle="Módulo 2: Arquitectura en Capas"
+  nextUrl="/modulos/02-arquitectura-capas"
+/>
+
+</Layout>

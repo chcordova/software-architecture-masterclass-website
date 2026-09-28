@@ -1,0 +1,89 @@
+---
+interface Props {
+  title: string;
+  showSidebar?: boolean;
+  isProse?: boolean;
+}
+
+const { title, showSidebar = true, isProse = true } = Astro.props;
+
+const modules = [
+  { name: '1. Fundamentos', href: '/modulos/01-fundamentos' },
+  { name: '2. Arquitectura en Capas', href: '/modulos/02-arquitectura-capas' },
+  { name: '3. Arquitectura Hexagonal', href: '/modulos/03-arquitectura-hexagonal' },
+  { name: '4. Sistemas Distribuidos', href: '/modulos/04-sistemas-distribuidos' },
+  { name: '5. Matriz Comparativa', href: '/modulos/05-comparativa' },
+  { name: '6. Quiz y Evaluación', href: '/modulos/06-quiz' },
+];
+---
+
+<!doctype html>
+<html lang="es" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Software Architecture Masterclass" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-slate-50 text-slate-900 font-sans min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 w-full backdrop-blur flex-none transition-colors duration-500 lg:z-50 border-b border-slate-900/10 bg-white/95 supports-backdrop-blur:bg-white/60">
+      <div class="max-w-8xl mx-auto">
+        <div class="py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <span class="bg-indigo-600 text-white rounded-md w-8 h-8 flex items-center justify-center font-black">A</span>
+            Software Architecture Masterclass
+          </a>
+          <div class="lg:hidden">
+            <!-- Hamburger Menu Button -->
+            <button id="mobile-menu-btn" type="button" class="text-slate-500 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 rounded" aria-label="Toggle Navigation">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 w-full max-w-8xl mx-auto flex items-start">
+      <!-- Sidebar -->
+      {showSidebar && (
+        <aside id="sidebar" class="fixed inset-0 top-[73px] z-30 hidden lg:block lg:sticky lg:top-[73px] lg:w-64 h-[calc(100vh-73px)] lg:shrink-0 border-r border-slate-200 bg-white lg:bg-transparent overflow-y-auto">
+          <nav class="px-4 lg:px-8 py-6">
+            <h2 class="font-semibold text-slate-900 mb-4 uppercase tracking-wider text-xs">Módulos</h2>
+            <ul class="space-y-3">
+              {modules.map((mod) => (
+                <li>
+                  <a href={mod.href} class="block text-sm text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                    {mod.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )}
+
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0 py-8 px-4 sm:px-6 lg:px-8">
+        <div class={isProse ? "max-w-4xl mx-auto w-full prose prose-slate prose-indigo prose-headings:font-semibold prose-a:text-indigo-600 hover:prose-a:text-indigo-500" : "max-w-6xl mx-auto w-full"}>
+          <slot />
+        </div>
+      </main>
+    </div>
+
+    <!-- Client Script for mobile menu -->
+    <script>
+      const btn = document.getElementById('mobile-menu-btn');
+      const sidebar = document.getElementById('sidebar');
+      
+      if (btn && sidebar) {
+        btn.addEventListener('click', () => {
+          sidebar.classList.toggle('hidden');
+        });
+      }
+    </script>
+  </body>
+</html>

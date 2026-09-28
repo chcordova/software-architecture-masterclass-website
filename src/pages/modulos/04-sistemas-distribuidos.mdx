@@ -1,0 +1,60 @@
+
+import Layout from '../../layouts/Layout.astro';
+import { Callout } from '../../components/Callout';
+import Pagination from '../../components/Pagination.astro';
+
+
+<Layout title="Módulo 4: Sistemas Distribuidos | Software Architecture Masterclass">
+
+# Módulo 4: Acoplamiento y Evolución a Sistemas Distribuidos
+
+Basándonos en las enseñanzas de **Neal Ford, Mark Richards, Pramod Sadalage y Zhamak Dehghani** en _Software Architecture: The Hard Parts_, en este módulo exploraremos las dimensiones del acoplamiento y cómo la Arquitectura Hexagonal prepara los microservicios para ecosistemas distribuidos.
+
+## 4.1 Acoplamiento Estático vs. Acoplamiento Dinámico
+
+En sistemas distribuidos, el análisis del acoplamiento se divide en dos dimensiones esenciales:
+
+### 1. Acoplamiento Estático (Static Coupling)
+
+Se refiere a cómo los componentes están "cableados" en tiempo de compilación o empaquetado.
+
+- **Medición:** Evalúa las dependencias directas de código, librerías compartidas (JARs/packages) y conexiones a bases de datos que un servicio necesita para arrancar (_bootstrapping_).
+- **Impacto:** Un alto acoplamiento estático impide desplegar o escalar un servicio de manera independiente.
+
+### 2. Acoplamiento Dinámico (Dynamic Coupling)
+
+Describe cómo se comunican los servicios en tiempo de ejecución para completar un flujo de trabajo.
+
+- **Medición:** Analiza la sincronicidad o asincronicidad de las llamadas a través de la red (HTTP REST vs. Mensajería Event-Driven).
+- **Impacto:** Afecta directamente las características operativas del sistema: **latencia**, **disponibilidad**, **tolerancia a fallos** y **elasticidad**.
+
+<Callout title="Riesgo de Acoplamiento Dinámico Sincrónico" type="warning">
+  Si el Servicio A llama de forma sincrónica al Servicio B, y B llama
+  sincrónicamente a C, la disponibilidad del flujo es el producto de las
+  disponibilidades individuales (A × B × C). Además, la latencia se acumula
+  linealmente.
+</Callout>
+
+## 4.2 Evolución a Microservicios Distribuidos: Patrón Sidecar y Service Mesh
+
+La **Arquitectura Hexagonal** facilita enormemente la evolución de microservicios hacia arquitecturas distribuidas avanzadas gracias a la separación clara entre las **preocupaciones del dominio** y las **preocupaciones operativas**.
+
+### Separación de Preocupaciones Operativas
+
+Aspectos como trazabilidad distribuida (OpenTelemetry), _circuit breaking_ (Resilience4j), autenticación mTLS y _service discovery_ son aspectos de infraestructura operacional que no pertenecen al núcleo de negocio.
+
+### El Patrón Sidecar y Service Mesh
+
+Al empaquetar el microservicio junto a un contenedor **Sidecar** (como Envoy en Istio o Linkerd):
+
+- **Cero contaminación del dominio:** El código Java en `domain/` no necesita incluir librerías pesadas de infraestructura para reintentos o mTLS.
+- **Delegación de acoplamiento dinámico:** El proxy Sidecar intercepta el tráfico entrante y saliente, gestionando la resiliencia en la red sin alterar una sola línea de lógica de negocio.
+
+<Pagination
+  nextTitle="Módulo 5: Tabla Comparativa"
+  nextUrl="/modulos/05-comparativa"
+  prevTitle="Módulo 3: Arquitectura Hexagonal"
+  prevUrl="/modulos/03-arquitectura-hexagonal"
+/>
+
+</Layout>

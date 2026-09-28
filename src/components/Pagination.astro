@@ -1,0 +1,36 @@
+---
+interface Props {
+  prevUrl?: string;
+  prevTitle?: string;
+  nextUrl?: string;
+  nextTitle?: string;
+}
+
+const { prevUrl, prevTitle, nextUrl, nextTitle } = Astro.props;
+---
+
+<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12 pt-8 border-t border-slate-200 not-prose">
+  {prevUrl ? (
+    <a 
+      href={prevUrl} 
+      class="flex-1 w-full flex flex-col items-start p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all duration-200 group bg-white no-underline"
+    >
+      <span class="text-sm font-medium text-slate-500 mb-1 group-hover:text-indigo-500 transition-colors">⬅️ Módulo Anterior</span>
+      <span class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{prevTitle}</span>
+    </a>
+  ) : (
+    <div class="flex-1 w-full hidden sm:block"></div>
+  )}
+
+  {nextUrl ? (
+    <a 
+      href={nextUrl} 
+      class="flex-1 w-full flex flex-col items-end text-right p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all duration-200 group bg-white no-underline"
+    >
+      <span class="text-sm font-medium text-slate-500 mb-1 group-hover:text-indigo-500 transition-colors">Módulo Siguiente ➡️</span>
+      <span class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{nextTitle}</span>
+    </a>
+  ) : (
+    <div class="flex-1 w-full hidden sm:block"></div>
+  )}
+</div>
