@@ -1,0 +1,45 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Se ejecuta cada vez que haces push a la rama principal
+  push:
+    branches: [main, master]
+  # Te permite ejecutar este workflow manualmente desde la pestaña "Actions"
+  workflow_dispatch:
+
+# Otorga permisos para leer el código y publicar en GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Previene que se ejecuten despliegues duplicados al mismo tiempo
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar, construir y subir el sitio (Astro Action)
+        uses: withastro/action@v3
+        with:
+          node-version: 20
+          package-manager: npm
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar a GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
