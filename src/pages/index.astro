@@ -11,6 +11,8 @@ interface ModuleCard {
   isAvailable: boolean;
 }
 
+const getBase = (path: string) => import.meta.env.BASE_URL + path;
+
 const modules: ModuleCard[] = [
   {
     id: '01',
@@ -18,7 +20,7 @@ const modules: ModuleCard[] = [
     title: 'Fundamentos & Atributos de Calidad',
     desc: 'Principios de diseño, Ley de Conway, deuda técnica y el equilibrio entre escalabilidad y mantenibilidad.',
     tags: ['Quality Attributes', 'Trade-offs', 'SOLID'],
-    href: '/modulos/01-fundamentos',
+    href: getBase('modulos/01-fundamentos'),
     isAvailable: true,
   },
   {
@@ -27,7 +29,7 @@ const modules: ModuleCard[] = [
     title: 'Arquitectura en Capas & Clean Architecture',
     desc: 'Separación de responsabilidades, regla de dependencia, desacoplamiento del framework e inversión de control.',
     tags: ['Clean Arch', 'Onion', 'Separation of Concerns'],
-    href: '/modulos/02-arquitectura-capas',
+    href: getBase('modulos/02-arquitectura-capas'),
     isAvailable: true,
   },
   {
@@ -36,7 +38,7 @@ const modules: ModuleCard[] = [
     title: 'Arquitectura Hexagonal (Ports & Adapters)',
     desc: 'Aislamiento del núcleo del dominio, diseño guiado por el dominio (DDD) y contratos de infraestructura.',
     tags: ['Ports & Adapters', 'DDD', 'Testability'],
-    href: '/modulos/03-arquitectura-hexagonal',
+    href: getBase('modulos/03-arquitectura-hexagonal'),
     isAvailable: true,
   },
   {
@@ -45,7 +47,7 @@ const modules: ModuleCard[] = [
     title: 'Sistemas Distribuidos & Event-Driven',
     desc: 'Teorema CAP, consistencia eventual, patrones de mensajería asíncrona, Outbox pattern y Sagas.',
     tags: ['Kafka/RabbitMQ', 'Eventual Consistency', 'Sagas'],
-    href: '/modulos/04-sistemas-distribuidos',
+    href: getBase('modulos/04-sistemas-distribuidos'),
     isAvailable: true,
   },
   {
@@ -54,7 +56,7 @@ const modules: ModuleCard[] = [
     title: 'Matriz Comparativa de Decisiones (ADRs)',
     desc: 'Metodología para documentar Architectural Decision Records y evaluar trade-offs con rigor técnico.',
     tags: ['ADR', 'Decision Matrix', 'Governance'],
-    href: '/modulos/05-comparativa',
+    href: getBase('modulos/05-comparativa'),
     isAvailable: true,
   },
   {
@@ -63,7 +65,7 @@ const modules: ModuleCard[] = [
     title: 'Evaluación Práctica & Quizzes',
     desc: 'Ponte a prueba con retos de diseño de sistemas reales y cuestionarios diagnósticos interactivos.',
     tags: ['Interactive Quiz', 'Case Studies', 'Review'],
-    href: '/modulos/06-quiz',
+    href: getBase('modulos/06-quiz'),
     isAvailable: true,
   },
 ];
@@ -87,7 +89,7 @@ const modules: ModuleCard[] = [
 
     <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
       <a
-        href="/modulos/01-fundamentos"
+        href={getBase('modulos/01-fundamentos')}
         class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-indigo-600 text-white font-semibold text-base shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 transition-all text-center"
       >
         Comenzar Ruta de Aprendizaje →

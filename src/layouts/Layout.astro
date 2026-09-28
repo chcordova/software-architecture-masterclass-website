@@ -7,13 +7,15 @@ interface Props {
 
 const { title, showSidebar = true, isProse = true } = Astro.props;
 
+const getBase = (path: string) => import.meta.env.BASE_URL + path;
+
 const modules = [
-  { name: '1. Fundamentos', href: '/modulos/01-fundamentos' },
-  { name: '2. Arquitectura en Capas', href: '/modulos/02-arquitectura-capas' },
-  { name: '3. Arquitectura Hexagonal', href: '/modulos/03-arquitectura-hexagonal' },
-  { name: '4. Sistemas Distribuidos', href: '/modulos/04-sistemas-distribuidos' },
-  { name: '5. Matriz Comparativa', href: '/modulos/05-comparativa' },
-  { name: '6. Quiz y Evaluación', href: '/modulos/06-quiz' },
+  { name: '1. Fundamentos', href: getBase('modulos/01-fundamentos') },
+  { name: '2. Arquitectura en Capas', href: getBase('modulos/02-arquitectura-capas') },
+  { name: '3. Arquitectura Hexagonal', href: getBase('modulos/03-arquitectura-hexagonal') },
+  { name: '4. Sistemas Distribuidos', href: getBase('modulos/04-sistemas-distribuidos') },
+  { name: '5. Matriz Comparativa', href: getBase('modulos/05-comparativa') },
+  { name: '6. Quiz y Evaluación', href: getBase('modulos/06-quiz') },
 ];
 ---
 
@@ -31,7 +33,7 @@ const modules = [
     <header class="sticky top-0 z-40 w-full backdrop-blur flex-none transition-colors duration-500 lg:z-50 border-b border-slate-900/10 bg-white/95 supports-backdrop-blur:bg-white/60">
       <div class="max-w-8xl mx-auto">
         <div class="py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <a href="/" class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <a href={import.meta.env.BASE_URL} class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
             <span class="bg-indigo-600 text-white rounded-md w-8 h-8 flex items-center justify-center font-black">A</span>
             Software Architecture Masterclass
           </a>
