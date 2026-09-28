@@ -7,7 +7,11 @@ interface Props {
 
 const { title, showSidebar = true, isProse = true } = Astro.props;
 
-const getBase = (path: string) => import.meta.env.BASE_URL + path;
+const getBase = (path: string) => {
+  const base = import.meta.env.BASE_URL;
+  const safeBase = base.endsWith('/') ? base : base + '/';
+  return safeBase + path;
+};
 
 const modules = [
   { name: '1. Fundamentos', href: getBase('modulos/01-fundamentos') },

@@ -7,12 +7,23 @@ interface Props {
 }
 
 const { prevUrl, prevTitle, nextUrl, nextTitle } = Astro.props;
+
+const getBaseUrl = (url?: string) => {
+  if (!url) return undefined;
+  const base = import.meta.env.BASE_URL;
+  const safeBase = base.endsWith('/') ? base : base + '/';
+  if (url.startsWith('/')) return safeBase + url.slice(1);
+  return url;
+};
+
+const safePrevUrl = getBaseUrl(prevUrl);
+const safeNextUrl = getBaseUrl(nextUrl);
 ---
 
 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12 pt-8 border-t border-slate-200 not-prose">
-  {prevUrl ? (
+  {safePrevUrl ? (
     <a 
-      href={prevUrl} 
+      href={safePrevUrl} 
       class="flex-1 w-full flex flex-col items-start p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all duration-200 group bg-white no-underline"
     >
       <span class="text-sm font-medium text-slate-500 mb-1 group-hover:text-indigo-500 transition-colors">⬅️ Módulo Anterior</span>
@@ -22,9 +33,9 @@ const { prevUrl, prevTitle, nextUrl, nextTitle } = Astro.props;
     <div class="flex-1 w-full hidden sm:block"></div>
   )}
 
-  {nextUrl ? (
+  {safeNextUrl ? (
     <a 
-      href={nextUrl} 
+      href={safeNextUrl} 
       class="flex-1 w-full flex flex-col items-end text-right p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all duration-200 group bg-white no-underline"
     >
       <span class="text-sm font-medium text-slate-500 mb-1 group-hover:text-indigo-500 transition-colors">Módulo Siguiente ➡️</span>
