@@ -1,4 +1,6 @@
 ---
+import { MODULES, getBase } from '../config/navigation';
+
 interface Props {
   title: string;
   showSidebar?: boolean;
@@ -7,21 +9,12 @@ interface Props {
 
 const { title, showSidebar = true, isProse = true } = Astro.props;
 
-const getBase = (path: string) => {
-  const base = import.meta.env.BASE_URL;
-  const safeBase = base.endsWith('/') ? base : base + '/';
-  return safeBase + path;
-};
-
-const modules = [
-  { name: '1. Fundamentos', href: getBase('modulos/01-fundamentos') },
-  { name: '2. Arquitectura en Capas', href: getBase('modulos/02-arquitectura-capas') },
-  { name: '3. Arquitectura Hexagonal', href: getBase('modulos/03-arquitectura-hexagonal') },
-  { name: '4. Diseño Avanzado (Práctica)', href: getBase('modulos/04-diseno-avanzado') },
-  { name: '5. Sistemas Distribuidos', href: getBase('modulos/05-sistemas-distribuidos') },
-  { name: '6. Matriz Comparativa', href: getBase('modulos/06-comparativa') },
-  { name: '7. Quiz y Evaluación', href: getBase('modulos/07-quiz') },
-];
+const currentPath = Astro.url.pathname.replace(/\/+$/, '');
+const modules = MODULES.map((mod) => ({
+  name: mod.sidebarName,
+  href: getBase(mod.slug),
+  isActive: currentPath.endsWith(mod.slug),
+}));
 ---
 
 <!doctype html>
@@ -30,7 +23,7 @@ const modules = [
     <meta charset="UTF-8" />
     <meta name="description" content="Software Architecture Masterclass" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={getBase('favicon.svg')} />
     <title>{title}</title>
   </head>
   <body class="bg-slate-50 text-slate-900 font-sans min-h-screen flex flex-col">
@@ -63,7 +56,16 @@ const modules = [
             <ul class="space-y-3">
               {modules.map((mod) => (
                 <li>
-                  <a href={mod.href} class="block text-sm text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                  <a
+                    href={mod.href}
+                    aria-current={mod.isActive ? "page" : undefined}
+                    class:list={[
+                      "block text-sm px-2.5 py-1.5 rounded-lg transition-colors duration-200",
+                      mod.isActive
+                        ? "font-semibold text-indigo-600 bg-indigo-50"
+                        : "text-slate-600 hover:text-indigo-600 hover:bg-slate-100/60",
+                    ]}
+                  >
                     {mod.name}
                   </a>
                 </li>

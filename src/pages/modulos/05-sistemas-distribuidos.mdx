@@ -2,13 +2,13 @@ import Layout from "../../layouts/Layout.astro";
 import { Callout } from "../../components/Callout";
 import Pagination from "../../components/Pagination.astro";
 
-<Layout title="Módulo 4: Sistemas Distribuidos | Software Architecture Masterclass">
+<Layout title="Módulo 5: Sistemas Distribuidos | Software Architecture Masterclass">
 
-# Módulo 4: Acoplamiento y Evolución a Sistemas Distribuidos
+# Módulo 5: Acoplamiento y Evolución a Sistemas Distribuidos
 
 Basándonos en las enseñanzas de **Neal Ford, Mark Richards, Pramod Sadalage y Zhamak Dehghani** en _Software Architecture: The Hard Parts_, en este módulo exploraremos las dimensiones del acoplamiento y cómo la Arquitectura Hexagonal prepara los microservicios para ecosistemas distribuidos.
 
-## 4.1 Acoplamiento Estático vs. Acoplamiento Dinámico
+## 5.1 Acoplamiento Estático vs. Acoplamiento Dinámico
 
 En sistemas distribuidos, el análisis del acoplamiento se divide en dos dimensiones esenciales:
 
@@ -33,7 +33,7 @@ Describe cómo se comunican los servicios en tiempo de ejecución para completar
   linealmente.
 </Callout>
 
-## 4.2 Evolución a Microservicios Distribuidos: Patrón Sidecar y Service Mesh
+## 5.2 Evolución a Microservicios Distribuidos: Patrón Sidecar y Service Mesh
 
 La **Arquitectura Hexagonal** facilita enormemente la evolución de microservicios hacia arquitecturas distribuidas avanzadas gracias a la separación clara entre las **preocupaciones del dominio** y las **preocupaciones operativas**.
 
@@ -49,7 +49,7 @@ Al empaquetar el microservicio junto a un contenedor **Sidecar** (como Envoy en 
 - **Delegación de acoplamiento dinámico:** El proxy Sidecar intercepta el tráfico entrante y saliente, gestionando la resiliencia en la red sin alterar una sola línea de lógica de negocio.
 
 <Pagination
-  nextTitle="Módulo 6: Tabla Comparativa"
+  nextTitle="Módulo 6: Matriz Comparativa"
   nextUrl="/modulos/06-comparativa"
   prevTitle="Módulo 4: Diseño Avanzado"
   prevUrl="/modulos/04-diseno-avanzado"

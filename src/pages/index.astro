@@ -1,87 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { MODULES, getBase } from '../config/navigation';
 
-interface ModuleCard {
-  id: string;
-  step: string;
-  title: string;
-  desc: string;
-  tags: string[];
-  href: string;
-  isAvailable: boolean;
-}
-
-const getBase = (path: string) => {
-  const base = import.meta.env.BASE_URL;
-  const safeBase = base.endsWith('/') ? base : base + '/';
-  return safeBase + path;
-};
-
-const modules: ModuleCard[] = [
-  {
-    id: '01',
-    step: 'Módulo 1',
-    title: 'Fundamentos & Atributos de Calidad',
-    desc: 'Principios de diseño, Ley de Conway, deuda técnica y el equilibrio entre escalabilidad y mantenibilidad.',
-    tags: ['Quality Attributes', 'Trade-offs', 'SOLID'],
-    href: getBase('modulos/01-fundamentos'),
-    isAvailable: true,
-  },
-  {
-    id: '02',
-    step: 'Módulo 2',
-    title: 'Arquitectura en Capas & Clean Architecture',
-    desc: 'Separación de responsabilidades, regla de dependencia, desacoplamiento del framework e inversión de control.',
-    tags: ['Clean Arch', 'Onion', 'Separation of Concerns'],
-    href: getBase('modulos/02-arquitectura-capas'),
-    isAvailable: true,
-  },
-  {
-    id: '03',
-    step: 'Módulo 3',
-    title: 'Arquitectura Hexagonal (Ports & Adapters)',
-    desc: 'Aislamiento del núcleo del dominio, diseño guiado por el dominio (DDD) y contratos de infraestructura.',
-    tags: ['Ports & Adapters', 'DDD', 'Testability'],
-    href: getBase('modulos/03-arquitectura-hexagonal'),
-    isAvailable: true,
-  },
-  {
-    id: '04',
-    step: 'Módulo 4',
-    title: 'Diseño Avanzado (Práctica)',
-    desc: 'Barreras de validación, intercepción de errores, y la prueba de fuego de compilación (pom.xml).',
-    tags: ['Validation', 'Exception Handling', 'Dependencies'],
-    href: getBase('modulos/04-diseno-avanzado'),
-    isAvailable: true,
-  },
-  {
-    id: '05',
-    step: 'Módulo 5',
-    title: 'Sistemas Distribuidos & Event-Driven',
-    desc: 'Teorema CAP, consistencia eventual, patrones de mensajería asíncrona, Outbox pattern y Sagas.',
-    tags: ['Kafka/RabbitMQ', 'Eventual Consistency', 'Sagas'],
-    href: getBase('modulos/05-sistemas-distribuidos'),
-    isAvailable: true,
-  },
-  {
-    id: '06',
-    step: 'Módulo 6',
-    title: 'Matriz Comparativa de Decisiones (ADRs)',
-    desc: 'Metodología para documentar Architectural Decision Records y evaluar trade-offs con rigor técnico.',
-    tags: ['ADR', 'Decision Matrix', 'Governance'],
-    href: getBase('modulos/06-comparativa'),
-    isAvailable: true,
-  },
-  {
-    id: '07',
-    step: 'Módulo 7',
-    title: 'Evaluación Práctica & Quizzes',
-    desc: 'Ponte a prueba con retos de diseño de sistemas reales y cuestionarios diagnósticos interactivos.',
-    tags: ['Interactive Quiz', 'Case Studies', 'Review'],
-    href: getBase('modulos/07-quiz'),
-    isAvailable: true,
-  },
-];
+const modules = MODULES.map((mod) => ({
+  ...mod,
+  href: getBase(mod.slug),
+}));
 ---
 
 <Layout title="Software Architecture Masterclass | Learning Path" showSidebar={false} isProse={false}>
@@ -118,7 +42,7 @@ const modules: ModuleCard[] = [
     <!-- Quick Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 pt-12 border-t border-slate-200">
       <div class="p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
-        <div class="text-2xl font-bold text-indigo-600">6</div>
+        <div class="text-2xl font-bold text-indigo-600">{modules.length}</div>
         <div class="text-xs font-medium text-slate-500 uppercase mt-1">Módulos Core</div>
       </div>
       <div class="p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
@@ -127,7 +51,7 @@ const modules: ModuleCard[] = [
       </div>
       <div class="p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
         <div class="text-2xl font-bold text-indigo-600">100%</div>
-        <div class="text-xs font-medium text-slate-500 uppercase mt-1">Práctico con TypeScript</div>
+        <div class="text-xs font-medium text-slate-500 uppercase mt-1">Práctico con Java & Spring</div>
       </div>
       <div class="p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
         <div class="text-2xl font-bold text-indigo-600">ADRs</div>

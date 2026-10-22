@@ -1,4 +1,6 @@
 ---
+import { getBase, getModuleNavigation } from '../config/navigation';
+
 interface Props {
   prevUrl?: string;
   prevTitle?: string;
@@ -8,38 +10,35 @@ interface Props {
 
 const { prevUrl, prevTitle, nextUrl, nextTitle } = Astro.props;
 
-const getBaseUrl = (url?: string) => {
-  if (!url) return undefined;
-  const base = import.meta.env.BASE_URL;
-  const safeBase = base.endsWith('/') ? base : base + '/';
-  if (url.startsWith('/')) return safeBase + url.slice(1);
-  return url;
-};
+const { prev, next } = getModuleNavigation(Astro.url.pathname);
 
-const safePrevUrl = getBaseUrl(prevUrl);
-const safeNextUrl = getBaseUrl(nextUrl);
+const resolvedPrevUrl = prev ? getBase(prev.slug) : prevUrl ? getBase(prevUrl) : undefined;
+const resolvedPrevTitle = prev ? prev.paginationTitle : prevTitle;
+
+const resolvedNextUrl = next ? getBase(next.slug) : nextUrl ? getBase(nextUrl) : undefined;
+const resolvedNextTitle = next ? next.paginationTitle : nextTitle;
 ---
 
 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12 pt-8 border-t border-slate-200 not-prose">
-  {safePrevUrl ? (
+  {resolvedPrevUrl ? (
     <a 
-      href={safePrevUrl} 
+      href={resolvedPrevUrl} 
       class="flex-1 w-full flex flex-col items-start p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all duration-200 group bg-white no-underline"
     >
       <span class="text-sm font-medium text-slate-500 mb-1 group-hover:text-indigo-500 transition-colors">⬅️ Módulo Anterior</span>
-      <span class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{prevTitle}</span>
+      <span class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{resolvedPrevTitle}</span>
     </a>
   ) : (
     <div class="flex-1 w-full hidden sm:block"></div>
   )}
 
-  {safeNextUrl ? (
+  {resolvedNextUrl ? (
     <a 
-      href={safeNextUrl} 
+      href={resolvedNextUrl} 
       class="flex-1 w-full flex flex-col items-end text-right p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all duration-200 group bg-white no-underline"
     >
       <span class="text-sm font-medium text-slate-500 mb-1 group-hover:text-indigo-500 transition-colors">Módulo Siguiente ➡️</span>
-      <span class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{nextTitle}</span>
+      <span class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{resolvedNextTitle}</span>
     </a>
   ) : (
     <div class="flex-1 w-full hidden sm:block"></div>
